@@ -110,6 +110,15 @@ ARG is omitted or nil."
 (setq-default
  indent-line-function 'insert-tab) ; set the indent function
 
+(use-package xt-mouse
+  :ensure nil
+  :unless (display-graphic-p)
+  :init
+  (advice-add 'normal-mouse-startup-screen :override #'normal-no-mouse-startup-screen)
+  (xterm-mouse-mode t)
+  :bind* (("<mouse-4>" . scroll-down-line)
+          ("<mouse-5>" . scroll-up-line)))
+
 (provide 'site-start)
 
 ;;; site-start.el ends here
