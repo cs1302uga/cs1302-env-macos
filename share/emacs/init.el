@@ -1,4 +1,4 @@
-;;; site-start.el --- Dr. Cotterell's site configuration. -*- mode: emacs-lisp; lexical-binding: t; -*-
+;;; init.el --- Dr. Cotterell's site configuration. -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -39,7 +39,7 @@
     (package-refresh-contents)
     (package-install 'use-package)))
 
-(defun cotterell/site-start/display-tab ()
+(defun cotterell/init/display-tab ()
   "Visually display TAB character."
   (defvar whitespace-style)
   (setq indent-tabs-mode nil)
@@ -63,7 +63,7 @@
   :hook ((prog-mode . display-line-numbers-mode)
          (text-mode . display-line-numbers-mode)))
 
-(add-hook 'java-mode-hook #'cotterell/site-start/display-tab)
+(add-hook 'java-mode-hook #'cotterell/init/display-tab)
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 ;; stub (global-linum-mode) -- it was obsoleted in emacs-29.1
@@ -119,6 +119,6 @@ ARG is omitted or nil."
   :bind* (("<mouse-4>" . scroll-down-line)
           ("<mouse-5>" . scroll-up-line)))
 
-(provide 'site-start)
+(provide 'init)
 
-;;; site-start.el ends here
+;;; init.el ends here
