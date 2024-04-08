@@ -110,6 +110,31 @@ ARG is omitted or nil."
 (setq-default
  indent-line-function 'insert-tab) ; set the indent function
 
+;; automatically update emacs packages
+(use-package auto-package-update
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (setq auto-package-update-hide-results t)
+  (setq auto-package-update-prompt-before-update t)
+  (setq auto-package-update-interval 4)
+  (auto-package-update-maybe))
+
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :commands flycheck-parse-checkstyle
+  :config
+  (progn
+    (let ((cs1302-xml (expand-file-name "../lib/cs1302_checks.xml" user-emacs-directory)))
+      ;; setup a syntax checker that conforms to the CSCI 1302 Code Style Guide
+      (flycheck-define-checker java-checkstyle-checker
+                               "A Java style checker using Checkstyle."
+                               :command ("checkstyle" (option "-c" check1302-xml) "-f" "xml" source)
+                               :error-parser flycheck-parse-checkstyle
+                               :enable t
+                               :modes java-mode)
+      ;; show style guide violations in emacs when in java-mode
+      (add-to-list 'flycheck-checkers 'java-checkstyle-checker))))
+
 (use-package xt-mouse
   :ensure nil
   :unless (display-graphic-p)
