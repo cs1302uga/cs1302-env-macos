@@ -759,7 +759,8 @@ task_activate() {
 	      "   java       runs the Oracle JVM\n" \
 	      "   javac      runs the Oracle JDK compiler\n" \
 	      "   jc         runs jc, which lets you convert program output to JSON\n" \
-	      "   jq         runs jq, the command-line JSON processor\n"
+	      "   jq         runs jq, the command-line JSON processor\n" \
+	      "   mvn        runs Apache Maven\n"
     echo_item "To preview JSON from some URL, we recommend:\n\n" \
               "   curl -Ls 'URL' | jq -C . | less -r\n"
     local LABEL="${CS1302_ENV_SCRIPT_PROG/.sh/}"
