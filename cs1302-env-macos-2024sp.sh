@@ -731,8 +731,10 @@ EOF
     chmod +x "${EMACS_EXE}"
     echo_item Generated user script for emacs.
     echo_item "Updating emacs packages (this may take a while)..."
+    echo ""
     2>&1 "${EMACS_EXE}" --batch --eval '(package-initialize)' --load "${EMACS_USER_DIR}/init.el" --eval '(package-upgrade-all)' \
 	| sed 's|^|    [emacs] |g'
+    echo ""
     #
     # ls
     #
@@ -751,12 +753,15 @@ task_activate() {
     echo_task Activating the environment...
     echo_item "Once activated, here are some commands that you can use:\n\n" \
 	      "   check1302  runs Checkstyle using the course style-guide\n" \
-	      "   emacs      runs Emacs -- while running, fn-F5 toggles themes\n" \
+	      "   emacs      runs Emacs, the text editor -- inside Emacs, fn-F5 toggles themes\n" \
 	      "   exit       exits the environment\n" \
+	      "   git        runs Git\n" \
 	      "   java       runs the Oracle JVM\n" \
-	      "   javac      runs the Oracle JDK compiler\n"
+	      "   javac      runs the Oracle JDK compiler\n" \
+	      "   jc         runs jc, which lets you convert program output to JSON\n" \
+	      "   jq         runs jq, the command-line JSON processor\n"
     echo_item "To preview JSON from some URL, we recommend:\n\n" \
-              "   curl -s 'URL' | jq . | less\n"
+              "   curl -Ls 'URL' | jq -C . | less -r\n"
     local LABEL="${CS1302_ENV_SCRIPT_PROG/.sh/}"
     export PATH="${CS1302_ENV_SCRIPT_USER_DIR_BIN}:${PATH}"
     export LSCOLORS
