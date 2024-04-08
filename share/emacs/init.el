@@ -183,11 +183,15 @@ ARG is omitted or nil."
   (modus-themes-bold-constructs t)
   (modus-themes-variable-pitch-ui t)
   (modus-themes-mixed-fonts t)
-  (modus-themes-to-toggle '(modus-operandi modus-vivendi))
+  (modus-themes-to-toggle '(modus-vivendi modus-operandi))
   (modus-themes-prompts '(bold))
   :config
   (load-theme (car modus-themes-to-toggle) t t)
-  :bind ("<f5>" . modus-themes-toggle))
+  (defun init/modus-themes-init ()
+    "Load the first theme in `modus-themes-to-toggle'."
+    (load-theme (car modus-themes-to-toggle)))
+  :bind ("<f5>" . modus-themes-toggle)
+  :hook (after-init . ct/modus-themes-init))
 
 (use-package xt-mouse
   :ensure nil

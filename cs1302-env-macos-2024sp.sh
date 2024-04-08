@@ -627,21 +627,19 @@ fetch_elisp() {
     local URL="https://raw.githubusercontent.com/cs1302uga/cs1302-env-macos/main/share/emacs/${FILE}"
     mkdir -p "${EMACS_USER_DIR}"
     echo_item "Checking: ${FILE}"
-    echo_item "NOTE: This ${FILE} is an environment-local version of ${FILE}," \
-	      "separate from the one in your home directory."
     if [[ -f "${EMACS_USER_DIR}/${FILE}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
 	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
 	    return 0
 	fi
-    else
-	return 0
     fi
-    echo_item "Downloading: ${FILE}"
-    if ! curl_download "${URL}?$(date +%s)" "${EMACS_USER_DIR}/${FILE}"; then
-	echo_error_exit "Unable to continue." \
-			"There was a problem fetching the required Elisp file" \
-			"${FILE} from ${URL}." \
-			"Please see an instructor for assisstance"
+    if [[ ! -f "${EMACS_USER_DIR}/${FILE}" ]] || [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
+	echo_item "Downloading: ${FILE}"
+	if ! curl_download "${URL}?$(date +%s)" "${EMACS_USER_DIR}/${FILE}"; then
+	    echo_error_exit "Unable to continue." \
+			    "There was a problem fetching the required Elisp file" \
+			    "${FILE} from ${URL}." \
+			    "Please see an instructor for assisstance"
+	fi
     fi
 } # fetch_elisp
 
@@ -654,15 +652,15 @@ fetch_style_guide_xml() {
 	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
 	    return 0
 	fi
-    else
-	return 0
     fi
-    echo_item "Downloading: ${FILE}"
-    if ! curl_download "${CS1302_CHECKS_URL}?$(date +%s)" "${CS1302_CHECKS_XML}"; then
-	echo_error_exit "Unable to continue." \
-			"There was a problem fetching the style guide" \
-			"XML file from ${CS1302_CHECKS_URL}." \
-			"Please see an instructor for assisstance"
+    if [[ ! -f "${CS1302_CHECKS_XML}" ]] || [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
+	echo_item "Downloading: ${FILE}"
+	if ! curl_download "${CS1302_CHECKS_URL}?$(date +%s)" "${CS1302_CHECKS_XML}"; then
+	    echo_error_exit "Unable to continue." \
+			    "There was a problem fetching the style guide" \
+			    "XML file from ${CS1302_CHECKS_URL}." \
+			    "Please see an instructor for assisstance"
+	fi
     fi
 } # fetch_style_guide_xml
 
@@ -675,15 +673,15 @@ fetch_checkstyle_jar() {
 	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
 	    return 0
 	fi
-    else
-	return 0
     fi
-    echo_item "Downloading checkstyle JAR..."
-    if ! curl_download "${CHECKSTYLE_URL}?$(date +%s)" "${CHECKSTYLE_JAR}"; then
-	echo_error_exit "Unable to continue." \
-			"There was a problem fetching chekstyle" \
-			"JAR from ${CHECKSTYLE_URL}." \
-			"Please see an instructor for assisstance"
+    if [[ ! -f "${CHECKSTYLE_JAR}" ]] || [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
+	echo_item "Downloading checkstyle JAR..."
+	if ! curl_download "${CHECKSTYLE_URL}?$(date +%s)" "${CHECKSTYLE_JAR}"; then
+	    echo_error_exit "Unable to continue." \
+			    "There was a problem fetching chekstyle" \
+			    "JAR from ${CHECKSTYLE_URL}." \
+			    "Please see an instructor for assisstance"
+	fi
     fi
 } # fetch_checkstyle_jar
 
@@ -751,12 +749,18 @@ EOF
 
 task_activate() {
     echo_task Activating the environment...
-    echo_item Once activated, you can run 'exit' to leave.
+    echo_item "Once activated, here are some commands that you can use:\n\n" \
+	      "   check1302  runs Checkstyle using the course style-guide\n" \
+	      "   emacs      runs Emacs -- while running, fn-F5 toggles themes\n" \
+	      "   exit       exits the environment\n" \
+	      "   java       runs the Oracle JVM\n" \
+	      "   javac      runs the Oracle JDK compiler\n"
+    echo_item "To preview JSON from some URL, we recommend:\n\n" \
+              "   curl -s 'URL' | jq . | less\n"
     local LABEL="${CS1302_ENV_SCRIPT_PROG/.sh/}"
     export PATH="${CS1302_ENV_SCRIPT_USER_DIR_BIN}:${PATH}"
     export LSCOLORS
     export CS1302_ENV_SCRIPT
-    echo ""
     case "${SHELL}" in
 	*zsh)
 	    export PROMPT="[${LABEL}] ${PROMPT}"
