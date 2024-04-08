@@ -189,7 +189,7 @@ ARG is omitted or nil."
   (load-theme (car modus-themes-to-toggle) t t)
   (defun init/modus-themes-init ()
     "Load the first theme in `modus-themes-to-toggle'."
-    (load-theme (car modus-themes-to-toggle)))
+    (load-theme (car modus-themes-to-toggle) t nil))
   :bind ("<f5>" . modus-themes-toggle)
   :hook (after-init . init/modus-themes-init))
 
