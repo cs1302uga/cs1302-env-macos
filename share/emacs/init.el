@@ -116,32 +116,20 @@ ARG is omitted or nil."
 (set-face-attribute 'font-lock-function-name-face nil
                     :foreground "cornflowerblue")
 
-;; automatically update emacs packages
-(use-package auto-package-update
-  :functions (auto-package-update-maybe)
-  :config
-  (setopt auto-package-update-delete-old-versions t)
-  (setopt auto-package-update-hide-results t)
-  (setopt auto-package-update-prompt-before-update t)
-  (setopt auto-package-update-interval 4)
-  (auto-package-update-maybe))
-
 (use-package flycheck
-  :functions (global-flycheck-mode)
+  :commands (flycheck-parse-checkstyle global-flycheck-mode)
   :init (global-flycheck-mode)
-  :commands flycheck-parse-checkstyle
   :config
-  (progn
-    (let ((cs1302-xml (expand-file-name "../lib/cs1302_checks.xml" user-emacs-directory)))
-      ;; setup a syntax checker that conforms to the CSCI 1302 Code Style Guide
-      (flycheck-define-checker java-checkstyle-checker
-                               "A Java style checker using Checkstyle."
-                               :command ("checkstyle" (option "-c" check1302-xml) "-f" "xml" source)
-                               :error-parser flycheck-parse-checkstyle
-                               :enable t
-                               :modes java-mode)
-      ;; show style guide violations in emacs when in java-mode
-      (add-to-list 'flycheck-checkers 'java-checkstyle-checker))))
+  (let ((cs1302-xml (expand-file-name "../lib/cs1302_checks.xml" user-emacs-directory)))
+    ;; setup a syntax checker that conforms to the CSCI 1302 Code Style Guide
+    (flycheck-define-checker java-checkstyle-checker
+      "A Java style checker using Checkstyle."
+      :command ("checkstyle" (option "-c" check1302-xml) "-f" "xml" source)
+      :error-parser flycheck-parse-checkstyle
+      :enable t
+      :modes java-mode)
+    ;; show style guide violations in emacs when in java-mode
+    (add-to-list 'flycheck-checkers 'java-checkstyle-checker)))
 
 (use-package xt-mouse
   :ensure nil

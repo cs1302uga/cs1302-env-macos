@@ -357,6 +357,20 @@ curl() {
     "${CURL_EXE}" "$@"
 } # curl
 
+curl_download() {
+    local URL="${1}"
+    local FILE="${2}"
+    tput sc >&2
+    curl \
+	-L \
+	-H 'Cache-Control: no-cache, no-store' \
+	-H 'Pragma: no-cache' \
+	--progress-bar \
+	"${URL}" >"${FILE}"
+    tput rc >&2
+    tput ed >&2
+} # curl_download
+
 curl_version() {
     local CURL_VERSION_OUTPUT="$(curl --version 2>/dev/null)"
     echo "${CURL_VERSION_OUTPUT%% (*}" 2>/dev/null
@@ -603,11 +617,7 @@ fetch_elisp() {
     local URL="https://raw.githubusercontent.com/cs1302uga/cs1302-env-macos/main/share/emacs/${FILE}"
     mkdir -p "${EMACS_USER_DIR}"
     echo_item "Downloading latest ${FILE}..."
-    if ! curl \
-	 -H 'Cache-Control: no-cache, no-store' \
-	 -H 'Pragma: no-cache' \
-	 --progress-bar \
-	 "${URL}?$(date +%s)" >"${EMACS_USER_DIR}/${FILE}"; then
+    if ! curl_download "${URL}?$(date +%s)" "${EMACS_USER_DIR}/${FILE}"; then
 	echo_error_exit "Unable to continue." \
 			"There was a problem fetching the required Elisp file" \
 			"${FILE} from ${URL}." \
@@ -619,12 +629,12 @@ fetch_style_guide_xml() {
     local CS1302_CHECKS_XML="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/cs1302_checks.xml"
     local CS1302_CHECKS_URL='https://raw.githubusercontent.com/cs1302uga/cs1302-styleguide/master/cs1302_checks.xml'
     echo_item "Downloading style guide XML..."
-    if ! curl \
-	 -L \
-	 -H 'Cache-Control: no-cache, no-store' \
-	 -H 'Pragma: no-cache' \
-	 --progress-bar \
-	 "${CS1302_CHECKS_URL}?$(date +%s)" >"${CS1302_CHECKS_XML}"; then
+    # if ! curl \
+    # 	 -L \
+    # 	 -H 'Cache-Control: no-cache, no-store' \
+    # 	 -H 'Pragma: no-cache' \
+    # 	 --progress-bar \
+    if ! curl_download "${CS1302_CHECKS_URL}?$(date +%s)" "${CS1302_CHECKS_XML}"; then
 	echo_error_exit "Unable to continue." \
 			"There was a problem fetching the style guide" \
 			"XML file from ${CS1302_CHECKS_URL}." \
@@ -665,6 +675,9 @@ task_setup_user_scripts() {
 EOF
     chmod +x "${EMACS_EXE}"
     echo_item Generated user script for emacs.
+    echo_item "Updating emacs packages (this may take a while)..."
+    2>&1 "${EMACS_EXE}" --batch --eval '(package-initialize)' --load "${EMACS_USER_DIR}/init.el" --eval '(package-upgrade-all)' \
+	| sed 's|^|    [emacs] |g'
     # checkstyle
     fetch_checkstyle_jar
     local CHECKSTYLE_JAR="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/checkstyle.jar"
