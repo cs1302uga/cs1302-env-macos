@@ -191,7 +191,7 @@ ARG is omitted or nil."
     "Load the first theme in `modus-themes-to-toggle'."
     (load-theme (car modus-themes-to-toggle)))
   :bind ("<f5>" . modus-themes-toggle)
-  :hook (after-init . ct/modus-themes-init))
+  :hook (after-init . init/modus-themes-init))
 
 (use-package xt-mouse
   :ensure nil
