@@ -110,16 +110,24 @@ ARG is omitted or nil."
 (setq-default
  indent-line-function 'insert-tab) ; set the indent function
 
+(set-face-attribute 'minibuffer-prompt nil
+                    :foreground "cornflowerblue")
+
+(set-face-attribute 'font-lock-function-name-face nil
+                    :foreground "cornflowerblue")
+
 ;; automatically update emacs packages
 (use-package auto-package-update
+  :functions (auto-package-update-maybe)
   :config
-  (setq auto-package-update-delete-old-versions t)
-  (setq auto-package-update-hide-results t)
-  (setq auto-package-update-prompt-before-update t)
-  (setq auto-package-update-interval 4)
+  (setopt auto-package-update-delete-old-versions t)
+  (setopt auto-package-update-hide-results t)
+  (setopt auto-package-update-prompt-before-update t)
+  (setopt auto-package-update-interval 4)
   (auto-package-update-maybe))
 
 (use-package flycheck
+  :functions (global-flycheck-mode)
   :init (global-flycheck-mode)
   :commands flycheck-parse-checkstyle
   :config

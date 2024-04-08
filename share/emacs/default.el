@@ -53,12 +53,6 @@
  backup-by-copying t      ; backups are copies
  vc-make-backup-files t)  ; backup files even if they are managed by a VCS
 
-(set-face-attribute 'minibuffer-prompt nil
-                    :foreground "cornflowerblue")
-
-(set-face-attribute 'font-lock-function-name-face nil
-                    :foreground "cornflowerblue")
-
 (provide 'default)
 
 ;;; default.el ends here
