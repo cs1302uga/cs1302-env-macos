@@ -457,10 +457,15 @@ task_check_homebrew_formula() {
     echo_task "Checking for Homebrew formula ${FORMULA}..."
     # install formula, if needed
     if ! brew list --formula | grep "${FORMULA}" &>/dev/null; then
-	echo_item "Installing Homebrew formula ${FORMULA}..."
-	if ! brew install ${FORMULA} ${OPTIONS}; then
-	   echo_error_exit "Unable to install required Homebrew formula ${FORMULA}." \
-			   "Please see an instructor for assistance."
+	if yes_or_no "Missing ${FORMULA}. Install it with Homebrew?"; then
+	    echo_item "Installing Homebrew formula ${FORMULA}..."
+	    if ! brew install ${FORMULA} ${OPTIONS}; then
+		echo_error_exit "Unable to install required Homebrew formula ${FORMULA}." \
+				"Please see an instructor for assistance."
+	    fi
+	else
+	    echo_error_exit "Unable to continue" \
+			    "The Homebrew formula ${FORMULA} is required to be installed."
 	fi
     fi
     # show the formula
@@ -474,10 +479,15 @@ task_check_homebrew_cask() {
     echo_task "Checking for Homebrew cask ${CASK}..."
     # install formula, if needed
     if ! brew list --cask | grep "${CASK}" &>/dev/null; then
-	echo_item "Installing Homebrew formula ${CASK}..."
-	if ! brew install --cask ${CASK} ${OPTIONS}; then
-	   echo_error_exit "Unable to install required Homebrew formula ${CASK}." \
-			   "Please see an instructor for assistance."
+	if yes_or_no "Missing ${CASK}. Install it with Homebrew?"; then
+	    echo_item "Installing Homebrew cask ${CASK}..."
+	    if ! brew install --cask ${CASK} ${OPTIONS}; then
+		echo_error_exit "Unable to install required Homebrew formula ${CASK}." \
+				"Please see an instructor for assistance."
+	    fi
+	else
+	    echo_error_exit "Unable to continue" \
+			    "The Homebrew cask ${FORMULA} is required to be installed."
 	fi
     fi
     # show the cask
@@ -533,7 +543,7 @@ task_check_jdk() {
     if [[ ! -d "${JDK_HOME}/bin" ]]; then
 	echo_item "It looks like this script has not downloaded Oracle JDK yet."
 	if yes_or_no "Download and install ${JDK_NAME}?"; then
-	    echo_item Downloading: "${JDK_URL}"
+	    echo_item Downloading: "${JDK_NAME}"
 	    curl --progress-bar -o "${JDK_ARCHIVE}" "${JDK_URL}"
 	    mkdir -p "${JDK_HOME}"
 	    if [[ "${CS1302_ENV_OS}" == "MACOS" ]]; then
@@ -591,7 +601,7 @@ task_check_maven() {
     if [[ ! -d "${MAVEN_HOME}/bin" ]]; then
 	echo_item "It looks like this script has not downloaded Apache Maven yet."
 	if yes_or_no "Download and install ${MAVEN_NAME}?"; then
-	    echo_item Downloading: "${MAVEN_URL}"
+	    echo_item Downloading: "${MAVEN_NAME}"
 	    curl --progress-bar -o "${MAVEN_ARCHIVE}" "${MAVEN_URL}"
 	    mkdir -p "${MAVEN_HOME}"
 	    echo_item Extracting: "${MAVEN_ARCHIVE}"
@@ -606,7 +616,7 @@ task_check_maven() {
 	echo_error_exit Unable to setup Maven. \
 			Please see an instructor for assistance.
     fi
-    echo_item Exporting to PATH: "${MAVEN_HOME}/bin"
+    echo_item Found: "${MAVEN_HOME}/bin"
     export PATH="${MAVEN_HOME}/bin:${PATH}"
     echo_item Found: "$(mvn --version | head -n 1 | cut -d' ' -f1-3)"
 } # task_check_maven
@@ -616,7 +626,15 @@ fetch_elisp() {
     local FILE="${1}"
     local URL="https://raw.githubusercontent.com/cs1302uga/cs1302-env-macos/main/share/emacs/${FILE}"
     mkdir -p "${EMACS_USER_DIR}"
-    echo_item "Downloading latest ${FILE}..."
+    echo_item "Checking: ${FILE}"
+    if [[ -f "${EMACS_USER_DIR}/${FILE}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
+	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
+	    return 0
+	fi
+    else
+	return 0
+    fi
+    echo_item "Downloading: ${FILE}"
     if ! curl_download "${URL}?$(date +%s)" "${EMACS_USER_DIR}/${FILE}"; then
 	echo_error_exit "Unable to continue." \
 			"There was a problem fetching the required Elisp file" \
@@ -626,14 +644,18 @@ fetch_elisp() {
 } # fetch_elisp
 
 fetch_style_guide_xml() {
+    local FILE="cs1302_checks.xml"
     local CS1302_CHECKS_XML="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/cs1302_checks.xml"
     local CS1302_CHECKS_URL='https://raw.githubusercontent.com/cs1302uga/cs1302-styleguide/master/cs1302_checks.xml'
-    echo_item "Downloading style guide XML..."
-    # if ! curl \
-    # 	 -L \
-    # 	 -H 'Cache-Control: no-cache, no-store' \
-    # 	 -H 'Pragma: no-cache' \
-    # 	 --progress-bar \
+    echo_item "Checking: ${FILE}"
+    if [[ -f "${CS1302_CHECKS_XML}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
+	if ! yes_or_no "${} already exists. Replace with latest version?"; then
+	    return 0
+	fi
+    else
+	return 0
+    fi
+    echo_item "Downloading: ${FILE}"
     if ! curl_download "${CS1302_CHECKS_URL}?$(date +%s)" "${CS1302_CHECKS_XML}"; then
 	echo_error_exit "Unable to continue." \
 			"There was a problem fetching the style guide" \
@@ -643,15 +665,19 @@ fetch_style_guide_xml() {
 } # fetch_style_guide_xml
 
 fetch_checkstyle_jar() {
+    local FILE="checkstyle.jar"
     local CHECKSTYLE_JAR="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/checkstyle.jar"
     local CHECKSTYLE_URL='https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.15.0/checkstyle-10.15.0-all.jar'
+    echo_item "Checking: ${FILE}"
+    if [[ -f "${CHECKSTYLE_JAR}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
+	if ! yes_or_no "${} already exists. Replace with latest version?"; then
+	    return 0
+	fi
+    else
+	return 0
+    fi
     echo_item "Downloading checkstyle JAR..."
-    if ! curl \
-	 -L \
-	 -H 'Cache-Control: no-cache, no-store' \
-	 -H 'Pragma: no-cache' \
-	 --progress-bar \
-	 "${CHECKSTYLE_URL}?$(date +%s)" >"${CHECKSTYLE_JAR}"; then
+    if ! curl_download "${CHECKSTYLE_URL}?$(date +%s)" "${CHECKSTYLE_JAR}"; then
 	echo_error_exit "Unable to continue." \
 			"There was a problem fetching chekstyle" \
 			"JAR from ${CHECKSTYLE_URL}." \
@@ -661,15 +687,45 @@ fetch_checkstyle_jar() {
 
 task_setup_user_scripts() {
     echo_task "Setting up user scripts and fetching additional files..."
+    #
+    # checkstyle
+    #
+    fetch_checkstyle_jar
+    local CHECKSTYLE_JAR="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/checkstyle.jar"
+    local CHECKSTYLE_EXE="${CS1302_ENV_SCRIPT_USER_DIR_BIN}/checkstyle"
+    cat <<-EOF >"${CHECKSTYLE_EXE}"
+#!/bin/bash -e
+
+java -jar "${CHECKSTYLE_JAR}" \$@
+EOF
+    chmod +x "${CHECKSTYLE_EXE}"
+    echo_item Generated user script for checkstyle.
+    #
+    # check1302
+    #
+    fetch_style_guide_xml
+    local CHECK1302_XML="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/check1302_checks.xml"
+    local CHECK1302_EXE="${CS1302_ENV_SCRIPT_USER_DIR_BIN}/check1302"
+    cat <<-EOF >"${CHECK1302_EXE}"
+#!/bin/bash -e
+
+"${CHECKSTYLE_EXE}" -c "${CHECK1302_XML}" \$@
+EOF
+    chmod +x "${CHECK1302_EXE}"
+    echo_item Generated user script for check1302.
+    #
     # emacs elisp files
+    #
     local EMACS_USER_DIR="${CS1302_ENV_SCRIPT_USER_DIR}/.emacs.d"
     fetch_elisp init.el
     fetch_elisp site-start.el
+    #
     # emacs executable script
+    #
     local EMACS_EXE="${CS1302_ENV_SCRIPT_USER_DIR_BIN}/emacs"
     mkdir -p "${EMACS_USER_DIR}"
     cat <<-EOF >"${EMACS_EXE}"
-#!/bin/bash
+#!/bin/bash -e
 
 "$(brew --prefix emacs-plus)/bin/emacs" --init-directory "${EMACS_USER_DIR}" -nw \$@
 EOF
@@ -678,37 +734,28 @@ EOF
     echo_item "Updating emacs packages (this may take a while)..."
     2>&1 "${EMACS_EXE}" --batch --eval '(package-initialize)' --load "${EMACS_USER_DIR}/init.el" --eval '(package-upgrade-all)' \
 	| sed 's|^|    [emacs] |g'
-    # checkstyle
-    fetch_checkstyle_jar
-    local CHECKSTYLE_JAR="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/checkstyle.jar"
-    local CHECKSTYLE_EXE="${CS1302_ENV_SCRIPT_USER_DIR_BIN}/checkstyle"
-    cat <<-EOF >"${CHECKSTYLE_EXE}"
-#!/bin/bash
+    #
+    # ls
+    #
+    local LS_EXE="${CS1302_ENV_SCRIPT_USER_DIR_BIN}/ls"
+    cat <<-EOF >"${LS_EXE}"
+#!/bin/bash -e
 
-java -jar "${CHECKSTYLE_JAR}" \$@
+/bin/ls --color=auto \$@
 EOF
-    chmod +x "${CHECKSTYLE_EXE}"
-    echo_item Generated user scripts for checkstyle.
-    # check1302
-    fetch_style_guide_xml
-    local CHECK1302_XML="${CS1302_ENV_SCRIPT_USER_DIR_LIB}/check1302_checks.xml"
-    local CHECK1302_EXE="${CS1302_ENV_SCRIPT_USER_DIR_BIN}/check1302"
-    cat <<-EOF >"${CHECK1302_EXE}"
-#!/bin/bash
-
-"${CHECKSTYLE_EXE}" -c "${CHECK1302_XML}" \$@
-EOF
-    chmod +x "${CHECK1302_EXE}"
-    echo_item Generated user script for check1302.
+    chmod +x "${LS_EXE}"
+    echo_item Generated user script for ls.
 } # task_setup_user_scripts
+
 
 task_activate() {
     echo_task Activating the environment...
     echo_item Once activated, you can run 'exit' to leave.
     local LABEL="${CS1302_ENV_SCRIPT_PROG/.sh/}"
     export PATH="${CS1302_ENV_SCRIPT_USER_DIR_BIN}:${PATH}"
+    export LSCOLORS
     export CS1302_ENV_SCRIPT
-    export -f echo_error_exit
+    echo ""
     case "${SHELL}" in
 	*zsh)
 	    export PROMPT="[${LABEL}] ${PROMPT}"
@@ -722,6 +769,7 @@ task_activate() {
 	    echo_error_exit Unable to spawn environment using "SHELL=${SHELL}".
 	    ;;
     esac
+    echo ""
 } # task_activate
 
 main() {
