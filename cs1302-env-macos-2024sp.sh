@@ -627,6 +627,8 @@ fetch_elisp() {
     local URL="https://raw.githubusercontent.com/cs1302uga/cs1302-env-macos/main/share/emacs/${FILE}"
     mkdir -p "${EMACS_USER_DIR}"
     echo_item "Checking: ${FILE}"
+    echo_item "NOTE: This ${FILE} is an environment-local version of ${FILE}," \
+	      "separate from the one in your home directory."
     if [[ -f "${EMACS_USER_DIR}/${FILE}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
 	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
 	    return 0
@@ -649,7 +651,7 @@ fetch_style_guide_xml() {
     local CS1302_CHECKS_URL='https://raw.githubusercontent.com/cs1302uga/cs1302-styleguide/master/cs1302_checks.xml'
     echo_item "Checking: ${FILE}"
     if [[ -f "${CS1302_CHECKS_XML}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
-	if ! yes_or_no "${} already exists. Replace with latest version?"; then
+	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
 	    return 0
 	fi
     else
@@ -670,7 +672,7 @@ fetch_checkstyle_jar() {
     local CHECKSTYLE_URL='https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.15.0/checkstyle-10.15.0-all.jar'
     echo_item "Checking: ${FILE}"
     if [[ -f "${CHECKSTYLE_JAR}" ]] && [[ "${CS1302_REDOWNLOAD:-0}" -eq 1 ]]; then
-	if ! yes_or_no "${} already exists. Replace with latest version?"; then
+	if ! yes_or_no "${FILE} already exists. Replace with latest version?"; then
 	    return 0
 	fi
     else
@@ -718,7 +720,6 @@ EOF
     #
     local EMACS_USER_DIR="${CS1302_ENV_SCRIPT_USER_DIR}/.emacs.d"
     fetch_elisp init.el
-    fetch_elisp site-start.el
     #
     # emacs executable script
     #
